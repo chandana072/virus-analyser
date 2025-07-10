@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virus Analysis Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow-md">
+    <h1 class="text-2xl font-bold">Virus Analysis</h1>
+    <div class="space-x-4">
+      <a href="/" class="hover:underline">Home</a>
+      <a href="/logout" class="hover:underline">Logout</a>
+    </div>
+  </nav>
+
+  <!-- Form Container -->
+  <div class="max-w-5xl mx-auto mt-10 bg-white p-8 rounded-xl shadow space-y-8">
+    <h2 class="text-3xl font-semibold text-center text-blue-900">Virus Parameter Submission</h2>
+
+    <form class="space-y-6" id="analysisForm" enctype="multipart/form-data" method="POST">
+
+      <!-- Virus Info -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block font-medium text-gray-700 mb-1">Name of the Virus</label>
+          <select class="w-full border border-gray-300 rounded px-4 py-2">
+            <option>Escherichia virus Qbeta</option>
+            <option>Influenza A</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-medium text-gray-700 mb-1">Nature of Virus</label>
+          <select class="w-full border border-gray-300 rounded px-4 py-2">
+            <option>Non-Enveloped Virus</option>
+            <option>Enveloped Virus</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sequence and Upload -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block font-medium text-gray-700 mb-1">Sequence</label>
+          <input id="sequenceInput" type="text" placeholder="Enter sequence"
+                 class="w-full border border-gray-300 rounded px-4 py-2">
+        </div>
+        <div>
+          <label class="block font-medium text-gray-700 mb-1">Upload a File (Choose One)</label>
+          <div class="flex space-x-3 mb-2">
+            <button type="button" id="localTab" class="bg-blue-600 text-white px-3 py-1 rounded">Local</button>
+            <button type="button" id="urlTab" class="bg-gray-200 text-blue-800 px-3 py-1 rounded">URL</button>
+          </div>
+          <input id="localInput" name="file" type="file" class="w-full border border-gray-300 rounded px-4 py-2">
+          <input id="urlInput" name="url" type="url" placeholder="Paste file URL"
+                 class="w-full hidden mt-2 border border-gray-300 rounded px-4 py-2">
+        </div>
+      </div>
+
+      <!-- Sequence Info -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block font-medium text-gray-700 mb-1">Nature of Sequence</label>
+          <select class="w-full border border-gray-300 rounded px-4 py-2">
+            <option>DNA</option>
+            <option>RNA</option>
+            <option>Protein</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-medium text-gray-700 mb-1">Genome Size / Number of Amino Acids</label>
+          <input type="text" name="genome_size" id="genomeSize" placeholder="e.g., 3200"
+                 class="w-full border border-gray-300 rounded px-4 py-2">
+        </div>
+      </div>
+
+      <!-- UV Wavelength -->
+      <div>
+        <label class="block font-medium text-gray-700 mb-2">UV Wavelength</label>
+        <div class="flex space-x-6">
+          <label class="flex items-center space-x-2">
+            <input type="radio" name="wavelength" class="accent-blue-600"> <span>254 nm</span>
+          </label>
+          <label class="flex items-center space-x-2">
+            <input type="radio" name="wavelength" class="accent-blue-600"> <span>279 nm</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Fluid Characteristics -->
+      <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold text-blue-900 mb-4">Fluid Characteristics</h3>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div>
+            <label class="block font-medium text-gray-700 mb-1">Fluid</label>
+            <select class="w-full border border-gray-300 rounded px-4 py-2">
+              <option>Water</option>
+              <option>Plasma</option>
+              <option>Saliva</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-gray-700 mb-1">Absorbance</label>
+            <input type="text" placeholder="e.g., 0.5" class="w-full border border-gray-300 rounded px-4 py-2">
+          </div>
+          <div>
+            <label class="block font-medium text-gray-700 mb-1">Transmittance</label>
+            <input type="text" placeholder="e.g., 70%" class="w-full border border-gray-300 rounded px-4 py-2">
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="text-center">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded shadow">
+          Analyze
+        </button>
+      </div>
+
+      <!-- Result -->
+      <div id="d90Result" class="text-center text-green-600 font-extrabold text-2xl mt-4"></div>
+    </form>
+  </div>
+
+  <!-- Upload Toggle and AJAX -->
+  <script>
+  document.getElementById("analysisForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const isUrlMode = !document.getElementById("urlInput").classList.contains("hidden");
+    const d90Result = document.getElementById("d90Result");
+    d90Result.textContent = "";
+
+    if (isUrlMode) {
+      const url = document.getElementById("urlInput").value;
+
+      if (!url) {
+        d90Result.textContent = "Please provide a file URL.";
+        return;
+      }
+
+      fetch("/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: url })
+      })
+      .then(res => res.json())
+      .then(data => {
+        d90Result.textContent = data.result ? `D90 Value: ${data.result}` : `Error: ${data.error}`;
+      })
+      .catch(err => {
+        d90Result.textContent = "Error: " + err.message;
+      });
+
+    } else {
+      const formData = new FormData();
+      const fileInput = document.getElementById("localInput");
+
+      if (!fileInput.files.length) {
+        d90Result.textContent = "Please choose a local file.";
+        return;
+      }
+
+      formData.append("file", fileInput.files[0]);
+
+      fetch("/analyze", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        d90Result.textContent = data.result ? `D90 Value: ${data.result}` : `Error: ${data.error}`;
+      })
+      .catch(err => {
+        d90Result.textContent = "Error: " + err.message;
+      });
+    }
+  });
+</script>
+
+
+
+  <footer class="text-center text-sm text-gray-600 py-6 mt-10">
+    &copy; 2025 Virus Analyzer | Built for Capstone Research
+  </footer>
+
+</body>
+</html>
