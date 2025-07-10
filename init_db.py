@@ -1,7 +1,7 @@
 import psycopg2
 
 # Paste your actual Render PostgreSQL connection string here
-DATABASE_URL = "postgresql://virususer:K9evWmVorkld10vaI6uhasKzjkb8u0zN@dpg-d1nu3kc9c44c73eps510-a.ohio-postgres.render.com/virusdb"
+DATABASE_URL = "postgresql://virususer:K9evWmVorkld10vaI6uhasKzjkb8u0zN@dpg-d1nu3kc9c44c73eps510-a/virusdb"
 
 conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
