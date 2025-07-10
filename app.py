@@ -113,6 +113,10 @@ def analyze():
 
     return jsonify({"error": "Unsupported request type"}), 400
 
+@app.route('/health')
+def health():
+    return "✅ Server is running"
+
 # Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
